@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; 
@@ -210,15 +211,45 @@ config_Turn.closedLoop
   public void periodic() {
 
     // This method will be called once per scheduler run
+    
   }
-  public void DriveMotors(Boolean isRobotRelative, double xAxis, double yAxis, double rot) {
 
-    if(m_controller.getLeftBumperButton()){
-      fieldspeeds =  new ChassisSpeeds(xAxis, yAxis, rot);
-    }
-    else {
-      fieldspeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_gyro.getAngle()+180));
-    }
+ public ChassisSpeeds CalcFieldSpeeds (Boolean isRobotRelative, double xAxis, double yAxis, double kYawRate) {
+
+  // Get the x speed or forward/backward speed. We are inverting this because
+// we want a positive value when we pull up. Xbox controllers
+// return positive values when you pull down by default.
+  final var xSpeed = m_xspeedLimiter.calculate(xAxis)* maxVel;
+
+// Get the y speed or sideways/strafe speed. We are inverting this because
+// we want a positive value when we pull to the left. Xbox controllers
+// return positive values when you pull to the right by default.
+final var ySpeed = -m_yspeedLimiter.calculate(yAxis)* maxVel;
+
+// Get the rate of angular rotation. We are inverting this because we want a
+// positive value when we pull to the left (remember, CCW is positive in
+// mathematics). Xbox controllers return positive values when you pull to
+// the right by default.
+final var rot = -m_rotLimiter.calculate(kYawRate)*maxYaw;
+
+/*Calculate Swerve Module States based on controller readings
+if left bumper is pressed Drive will be Robot Relative
+otherwise Drive is Field Centric
+*/
+
+  if(isRobotRelative) {
+    fieldspeeds =  new ChassisSpeeds(xAxis, yAxis, rot);
+
+  }
+  else {
+    fieldspeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(m_gyro.getAngle()+180));
+  }
+return fieldspeeds;
+
+  }
+  public void DriveMotors(ChassisSpeeds fieldspeeds) {
+
+    
   SwerveModuleState[] moduleStates = m_Kinematics.toSwerveModuleStates(fieldspeeds);
   SwerveModuleState BackLeftSwerve = moduleStates[0];
   SwerveModuleState BackRightSwerve = moduleStates[1];
@@ -263,6 +294,7 @@ config_Turn.closedLoop
   m_BackRightDrivePID.setReference(BackRightSwerve.speedMetersPerSecond, SparkMax.ControlType.kVelocity);
   m_FrontLeftDrivePID.setReference(FrontLeftSwerve.speedMetersPerSecond, SparkMax.ControlType.kVelocity);
   m_FrontRightDrivePID.setReference(FrontRightSwerve.speedMetersPerSecond, SparkMax.ControlType.kVelocity);
-
   }
+
 }
+
