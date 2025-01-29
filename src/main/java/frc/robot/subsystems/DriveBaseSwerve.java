@@ -26,18 +26,20 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.RelativeEncoder;
 import java.lang.Math;
 import com.ctre.phoenix6.hardware.CANcoder;
+import Constants.java;
 
 public class DriveBaseSwerve extends SubsystemBase {
   /** Creates a new DriveBaseSwerve. */
  
-  private final SparkMax BackRightDrive = new SparkMax(41, MotorType.kBrushless);
-  private final SparkMax BackRightTurn = new SparkMax(42, MotorType.kBrushless);
-  private final SparkMax FrontRightDrive = new SparkMax(11, MotorType.kBrushless);
-  private final SparkMax FrontRightTurn = new SparkMax(12, MotorType.kBrushless);
-  private final SparkMax FrontLeftDrive = new SparkMax(21, MotorType.kBrushless);
-  private final SparkMax FrontLeftTurn = new SparkMax(22, MotorType.kBrushless);
-  private final SparkMax BackLeftDrive = new SparkMax(31, MotorType.kBrushless);
-  private final SparkMax BackLeftTurn = new SparkMax(32, MotorType.kBrushless);
+ //constants
+  private final SparkMax BackRightDrive = new SparkMax(Constants.BackRightDriveCANId, MotorType.kBrushless);
+  private final SparkMax BackRightTurn = new SparkMax(constants.BackRightTurnCANId, MotorType.kBrushless);
+  private final SparkMax FrontRightDrive = new SparkMax(constants.FrontRightDriveCANId, MotorType.kBrushless);
+  private final SparkMax FrontRightTurn = new SparkMax(constants.FrontRightTurnCANId, MotorType.kBrushless);
+  private final SparkMax FrontLeftDrive = new SparkMax(constants.FrontLeftDriveCANId, MotorType.kBrushless);
+  private final SparkMax FrontLeftTurn = new SparkMax(constants.FrontLeftTurnCANId, MotorType.kBrushless);
+  private final SparkMax BackLeftDrive = new SparkMax(constants.BackLeftDriveCANId, MotorType.kBrushless);
+  private final SparkMax BackLeftTurn = new SparkMax(constants.BackLeftTurnCANId, MotorType.kBrushless);
   
    //create SparkClosedLoopControllers to fix Drive and Turn motors
 
@@ -58,38 +60,16 @@ public class DriveBaseSwerve extends SubsystemBase {
   private RelativeEncoder m_FrontLeftTurnEncoder = FrontLeftTurn.getEncoder();
   
   //Bind CANcoders for Absolute Turn Encoding
-  private static final String canBusName = "rio";
-  private final CANcoder m_FrontRightTurnCancoder = new CANcoder(10, canBusName);
-  private final CANcoder m_FrontLeftTurnCancoder = new CANcoder(20, canBusName);
-  private final CANcoder m_BackLeftTurnCancoder = new CANcoder(30, canBusName);
-  private final CANcoder m_BackRightTurnCancoder = new CANcoder(40, canBusName);
+  
+  private final CANcoder m_FrontRightTurnCancoder = new CANcoder(constants.FrontRightTurnCancoderId, constants.canBusName);
+  private final CANcoder m_FrontLeftTurnCancoder = new CANcoder(constants.FrontLeftTurnCancoderId, constants.canBusName);
+  private final CANcoder m_BackLeftTurnCancoder = new CANcoder(constants.BackLeftTurnCancoderId, constants.canBusName);
+  private final CANcoder m_BackRightTurnCancoder = new CANcoder(constants.BackRightTurnCancoderId, constants.canBusName);
 
    //Bind Module controllers
   private ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
-   //Create Variables to store PID coefficients and other config parameters
-   public double maxRPM, setTurn;
-   public double kdP, kdI, kdD, kdIz, kdFF, kdMaxOutput, kdMinOutput;
-   public double ktP, ktI, ktD, ktIz, ktFF, ktMaxOutput, ktMinOutput;
-   public double ksP, ksI, ksD, ksIz, ksFF, ksMaxOutput, ksMinOutput;
-   public double xAxis, yAxis, kYawRate, maxVel, maxYaw, o_lyAxis, o_ryAxis;
-   public double k_posConv = .048; // linear meters traveled at wheel, per motor rotation
-   public double k_velConv = .0008106; // linear meters per second (m/s) speed at wheel, convert from motor RPM
-   public double k_turnConv = 16.8; //wheel degrees per motor rotation from steering relative encoder
-   public double rotations;
-   
-   //Create Swerve Kinematics modules
-Translation2d m_BackLeftLocation = new Translation2d(-0.25 ,0.250);
-Translation2d m_BackRightLocation = new Translation2d(-0.25 ,-.250);
-Translation2d m_FrontLeftLocation = new Translation2d(.250,.250);
-Translation2d m_FrontRightLocation = new Translation2d(.250,-.250);
-
-// Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
-private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
-private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
-private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
-
-public final SwerveDriveKinematics m_Kinematics = new SwerveDriveKinematics(m_BackLeftLocation, m_BackRightLocation, m_FrontLeftLocation, m_FrontRightLocation);
+public final SwerveDriveKinematics m_Kinematics = new SwerveDriveKinematics(constants.m_BackLeftLocation, constants.m_BackRightLocation, constants.m_FrontLeftLocation, constants.m_FrontRightLocation);
 
 //Create instance of fieldspeeds to store the ChassisSpeeds
 ChassisSpeeds fieldspeeds = new ChassisSpeeds(0,0,0);
@@ -100,59 +80,41 @@ public DriveBaseSwerve() {
   
   //Declare Drive PID coefficients 
 
-  
-  kdP = 0.4; 
-  kdI = 0.00000;
-  kdD = 0.05; 
-  kdIz = 0; 
-  kdFF = 0.01; 
-  kdMaxOutput = 1; 
-  kdMinOutput = -1;
-
   config_Drive
     .smartCurrentLimit(40)
     .inverted(true)
     .idleMode(IdleMode.kCoast);
 config_Drive.encoder
-    .positionConversionFactor(k_posConv)
-    .velocityConversionFactor(k_velConv);
+    .positionConversionFactor(constants.k_posConv)
+    .velocityConversionFactor(constants.k_velConv);
 config_Drive.closedLoop
     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pid(kdP, kdI, kdD)
-    .iZone(kdIz)
-    .velocityFF(kdFF)
-    .outputRange(kdMinOutput, kdMaxOutput);
+    .pid(constants.kdP, constants.kdI, constants.kdD)
+    .iZone(constants.kdIz)
+    .velocityFF(constants.kdFF)
+    .outputRange(constants.kdMinOutput, constants.kdMaxOutput);
 
-      //Create SparkMax Config for Turn motors
    /**
     * The PID Controller can be configured to use the analog sensor as its feedback
     * device with the method SetFeedbackDevice() and passing the PID Controller
     * the SparkMaxAnalogSensor object. 
     */
+   
   SparkMaxConfig config_Turn = new SparkMaxConfig();
-  
-  // Turn PID coefficients
-  ktP = 0.07; 
-  ktI = 0.0000;
-  ktD = 0.001;
-  ktIz = 0; 
-  ktFF = 0.003; 
-  ktMaxOutput = .9; 
-  ktMinOutput = -.9;
-
+ 
 config_Turn
     .smartCurrentLimit(40)
     .inverted(true)
     .idleMode(IdleMode.kCoast);
 config_Turn.encoder
-    .positionConversionFactor(k_turnConv)
-    .velocityConversionFactor(k_turnConv);
+    .positionConversionFactor(contsants.k_turnConv)
+    .velocityConversionFactor(contsants.k_turnConv);
 config_Turn.closedLoop
     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pid(ktP, ktI, ktD)
-    .iZone(ktIz)
-    .velocityFF(ktFF)
-    .outputRange(ktMinOutput, ktMaxOutput)
+    .pid(contsants.ktP, contsants.ktI, contsants.ktD)
+    .iZone(contsants.ktIz)
+    .velocityFF(contsants.ktFF)
+    .outputRange(contsants.ktMinOutput, contsants.ktMaxOutput)
     .positionWrappingEnabled(true)
     .positionWrappingMinInput(0)
     .positionWrappingMaxInput(360);
@@ -186,8 +148,7 @@ config_Turn.closedLoop
     m_BackLeftTurnEncoder.setPosition(m_BackLeftTurnCancoder.getAbsolutePosition().getValueAsDouble());
     m_BackRightTurnEncoder.setPosition(m_BackRightTurnCancoder.getAbsolutePosition().getValueAsDouble());
 
-    maxVel = 4; // m/s linear velocity of drive wheel
-    maxYaw = 2*Math.PI;   // max rad/s for chassis rotation rate
+    
       
     //Set Initial Swerve States
     ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 0);
@@ -219,18 +180,18 @@ config_Turn.closedLoop
   // Get the x speed or forward/backward speed. We are inverting this because
 // we want a positive value when we pull up. Xbox controllers
 // return positive values when you pull down by default.
-  final var xSpeed = m_xspeedLimiter.calculate(xAxis)* maxVel;
+  final var xSpeed = constants.m_xspeedLimiter.calculate(xAxis)* constants.maxVel;
 
 // Get the y speed or sideways/strafe speed. We are inverting this because
 // we want a positive value when we pull to the left. Xbox controllers
 // return positive values when you pull to the right by default.
-final var ySpeed = -m_yspeedLimiter.calculate(yAxis)* maxVel;
+final var ySpeed = constants.-m_yspeedLimiter.calculate(yAxis)* constants.maxVel;
 
 // Get the rate of angular rotation. We are inverting this because we want a
 // positive value when we pull to the left (remember, CCW is positive in
 // mathematics). Xbox controllers return positive values when you pull to
 // the right by default.
-final var rot = -m_rotLimiter.calculate(kYawRate)*maxYaw;
+final var rot = contsants.-m_rotLimiter.calculate(kYawRate)* constants.maxYaw;
 
 /*Calculate Swerve Module States based on controller readings
 if left bumper is pressed Drive will be Robot Relative
