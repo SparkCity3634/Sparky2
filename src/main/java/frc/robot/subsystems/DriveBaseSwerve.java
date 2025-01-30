@@ -26,7 +26,10 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.RelativeEncoder;
 import java.lang.Math;
 import com.ctre.phoenix6.hardware.CANcoder;
-import frc.robot.Constants; // Constants class wasn't be properly imported before because it didn't follow the naming conventions for WPILib
+import frc.robot.Constants; /* Constants class wasn't be properly imported before because 
+it didn't follow the naming conventions for WPILib. Cnstants were also sometimes mispelled or spelt with a lower case c.
+note from kelise: don't worry about speed! type slow or even copy and paste if needed.
+*/
 
 
 public class DriveBaseSwerve extends SubsystemBase {
@@ -90,14 +93,14 @@ public DriveBaseSwerve() {
     .inverted(true)
     .idleMode(IdleMode.kCoast);
 config_Drive.encoder
-    .positionConversionFactor(Constants.OperatorConstants.k_posConv)
-    .velocityConversionFactor(Constants.OperatorConstants.k_velConv);
+    .positionConversionFactor(Constants.PIDConstants.k_posConv)
+    .velocityConversionFactor(Constants.PIDConstants.k_velConv);
 config_Drive.closedLoop
     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pid(Constants.OperatorConstants.kdP, Constants.OperatorConstants.kdI, Constants.kdD)
-    .iZone(Constants.kdIz)
-    .velocityFF(Constants.kdFF)
-    .outputRange(Constants.kdMinOutput, Constants.kdMaxOutput);
+    .pid(Constants.PIDConstants.kdP, Constants.PIDConstants.kdI, Constants.PIDConstants.kdD)
+    .iZone(Constants.PIDConstants.kdIz)
+    .velocityFF(Constants.PIDConstants.kdFF)
+    .outputRange(Constants.PIDConstants.kdMinOutput, Constants.PIDConstants.kdMaxOutput);
 
    /**
     * The PID Controller can be configured to use the analog sensor as its feedback
@@ -112,14 +115,16 @@ config_Turn
     .inverted(true)
     .idleMode(IdleMode.kCoast);
 config_Turn.encoder
-    .positionConversionFactor(contsants.k_turnConv)
-    .velocityConversionFactor(contsants.k_turnConv);
+    .positionConversionFactor(Constants.PIDConstants.k_turnConv)
+    .velocityConversionFactor(Constants.PIDConstants.k_turnConv);
 config_Turn.closedLoop
     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pid(contsants.ktP, contsants.ktI, contsants.ktD)
-    .iZone(contsants.ktIz)
-    .velocityFF(contsants.ktFF)
-    .outputRange(contsants.ktMinOutput, contsants.ktMaxOutput)
+    //?
+    .positionConversionFactor(Constants.PIDConstants.k_turnConv)
+    .pid(Constants.PIDConstants.ktP, Constants.PIDConstants.ktI, Constants.PIDConstants.ktD)
+    .iZone(Constants.PIDConstants.ktIz)
+    .velocityFF(Constants.PIDConstants.ktFF)
+    .outputRange(Constants.PIDConstants.ktMinOutput, Constants.PIDConstants.ktMaxOutput)
     .positionWrappingEnabled(true)
     .positionWrappingMinInput(0)
     .positionWrappingMaxInput(360);
@@ -185,18 +190,18 @@ config_Turn.closedLoop
   // Get the x speed or forward/backward speed. We are inverting this because
 // we want a positive value when we pull up. Xbox controllers
 // return positive values when you pull down by default.
-  final var xSpeed = Constants.m_xspeedLimiter.calculate(xAxis)* Constants.maxVel;
+  final var xSpeed = m_xspeedLimiter.calculate(xAxis)* Constants.PIDConstants.maxVel;
 
 // Get the y speed or sideways/strafe speed. We are inverting this because
 // we want a positive value when we pull to the left. Xbox controllers
 // return positive values when you pull to the right by default.
-final var ySpeed = Constants.-m_yspeedLimiter.calculate(yAxis)* Constants.maxVel;
+final var ySpeed = -m_yspeedLimiter.calculate(yAxis)* Constants.PIDConstants.maxVel;
 
 // Get the rate of angular rotation. We are inverting this because we want a
 // positive value when we pull to the left (remember, CCW is positive in
 // mathematics). Xbox controllers return positive values when you pull to
 // the right by default.
-final var rot = contsants.-m_rotLimiter.calculate(kYawRate)* Constants.maxYaw;
+final var rot = -m_rotLimiter.calculate(kYawRate)* Constants.PIDConstants.maxYaw;
 
 /*Calculate Swerve Module States based on controller readings
 if left bumper is pressed Drive will be Robot Relative
@@ -204,7 +209,7 @@ otherwise Drive is Field Centric
 */
 
   if(isRobotRelative) {
-    fieldspeeds =  new ChassisSpeeds(xAxis, yAxis, rot);
+    fieldspeeds = new ChassisSpeeds(xAxis, yAxis, rot);
 
   }
   else {

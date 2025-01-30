@@ -88,9 +88,9 @@ public static final Translation2d m_BackRightLocation = new Translation2d(-0.25 
 public static final Translation2d m_FrontLeftLocation = new Translation2d(.250,.250);
 public static final Translation2d m_FrontRightLocation = new Translation2d(.250,-.250);
 
-public static final int SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
-public static final int SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
-public static final int SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
+public static final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
+public static final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
+public static final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
   }
 }
