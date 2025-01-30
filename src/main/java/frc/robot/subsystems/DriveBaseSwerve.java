@@ -26,20 +26,25 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.RelativeEncoder;
 import java.lang.Math;
 import com.ctre.phoenix6.hardware.CANcoder;
-import Constants.java;
+import frc.robot.Constants; // Constants class wasn't be properly imported before because it didn't follow the naming conventions for WPILib
+
 
 public class DriveBaseSwerve extends SubsystemBase {
   /** Creates a new DriveBaseSwerve. */
  
- //constants
-  private final SparkMax BackRightDrive = new SparkMax(Constants.BackRightDriveCANId, MotorType.kBrushless);
-  private final SparkMax BackRightTurn = new SparkMax(constants.BackRightTurnCANId, MotorType.kBrushless);
-  private final SparkMax FrontRightDrive = new SparkMax(constants.FrontRightDriveCANId, MotorType.kBrushless);
-  private final SparkMax FrontRightTurn = new SparkMax(constants.FrontRightTurnCANId, MotorType.kBrushless);
-  private final SparkMax FrontLeftDrive = new SparkMax(constants.FrontLeftDriveCANId, MotorType.kBrushless);
-  private final SparkMax FrontLeftTurn = new SparkMax(constants.FrontLeftTurnCANId, MotorType.kBrushless);
-  private final SparkMax BackLeftDrive = new SparkMax(constants.BackLeftDriveCANId, MotorType.kBrushless);
-  private final SparkMax BackLeftTurn = new SparkMax(constants.BackLeftTurnCANId, MotorType.kBrushless);
+ //Constants
+
+  // other classes within Constants can be referenced by adding the nested class name next to it.
+ // ex. Constants.OperatorConstants
+
+  private final SparkMax BackRightDrive = new SparkMax(Constants.OperatorConstants.BackRightDriveCANId, MotorType.kBrushless);
+  private final SparkMax BackRightTurn = new SparkMax(Constants.OperatorConstants.BackRightTurnCANId, MotorType.kBrushless);
+  private final SparkMax FrontRightDrive = new SparkMax(Constants.OperatorConstants.FrontRightDriveCANId, MotorType.kBrushless);
+  private final SparkMax FrontRightTurn = new SparkMax(Constants.OperatorConstants.FrontRightTurnCANId, MotorType.kBrushless);
+  private final SparkMax FrontLeftDrive = new SparkMax(Constants.OperatorConstants.FrontLeftDriveCANId, MotorType.kBrushless);
+  private final SparkMax FrontLeftTurn = new SparkMax(Constants.OperatorConstants.FrontLeftTurnCANId, MotorType.kBrushless);
+  private final SparkMax BackLeftDrive = new SparkMax(Constants.OperatorConstants.BackLeftDriveCANId, MotorType.kBrushless);
+  private final SparkMax BackLeftTurn = new SparkMax(Constants.OperatorConstants.BackLeftTurnCANId, MotorType.kBrushless);
   
    //create SparkClosedLoopControllers to fix Drive and Turn motors
 
@@ -61,15 +66,15 @@ public class DriveBaseSwerve extends SubsystemBase {
   
   //Bind CANcoders for Absolute Turn Encoding
   
-  private final CANcoder m_FrontRightTurnCancoder = new CANcoder(constants.FrontRightTurnCancoderId, constants.canBusName);
-  private final CANcoder m_FrontLeftTurnCancoder = new CANcoder(constants.FrontLeftTurnCancoderId, constants.canBusName);
-  private final CANcoder m_BackLeftTurnCancoder = new CANcoder(constants.BackLeftTurnCancoderId, constants.canBusName);
-  private final CANcoder m_BackRightTurnCancoder = new CANcoder(constants.BackRightTurnCancoderId, constants.canBusName);
+  private final CANcoder m_FrontRightTurnCancoder = new CANcoder(Constants.OperatorConstants.FrontRightTurnCancoderId, Constants.OperatorConstants.canBusName);
+  private final CANcoder m_FrontLeftTurnCancoder = new CANcoder(Constants.OperatorConstants.FrontLeftTurnCancoderId, Constants.OperatorConstants.canBusName);
+  private final CANcoder m_BackLeftTurnCancoder = new CANcoder(Constants.OperatorConstants.BackLeftTurnCancoderId, Constants.OperatorConstants.canBusName);
+  private final CANcoder m_BackRightTurnCancoder = new CANcoder(Constants.OperatorConstants.BackRightTurnCancoderId, Constants.OperatorConstants.canBusName);
 
    //Bind Module controllers
   private ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
-public final SwerveDriveKinematics m_Kinematics = new SwerveDriveKinematics(constants.m_BackLeftLocation, constants.m_BackRightLocation, constants.m_FrontLeftLocation, constants.m_FrontRightLocation);
+public final SwerveDriveKinematics m_Kinematics = new SwerveDriveKinematics(Constants.OperatorConstants.m_BackLeftLocation, Constants.OperatorConstants.m_BackRightLocation, Constants.OperatorConstants.m_FrontLeftLocation, Constants.OperatorConstants.m_FrontRightLocation);
 
 //Create instance of fieldspeeds to store the ChassisSpeeds
 ChassisSpeeds fieldspeeds = new ChassisSpeeds(0,0,0);
@@ -85,14 +90,14 @@ public DriveBaseSwerve() {
     .inverted(true)
     .idleMode(IdleMode.kCoast);
 config_Drive.encoder
-    .positionConversionFactor(constants.k_posConv)
-    .velocityConversionFactor(constants.k_velConv);
+    .positionConversionFactor(Constants.OperatorConstants.k_posConv)
+    .velocityConversionFactor(Constants.OperatorConstants.k_velConv);
 config_Drive.closedLoop
     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-    .pid(constants.kdP, constants.kdI, constants.kdD)
-    .iZone(constants.kdIz)
-    .velocityFF(constants.kdFF)
-    .outputRange(constants.kdMinOutput, constants.kdMaxOutput);
+    .pid(Constants.OperatorConstants.kdP, Constants.OperatorConstants.kdI, Constants.kdD)
+    .iZone(Constants.kdIz)
+    .velocityFF(Constants.kdFF)
+    .outputRange(Constants.kdMinOutput, Constants.kdMaxOutput);
 
    /**
     * The PID Controller can be configured to use the analog sensor as its feedback
@@ -180,18 +185,18 @@ config_Turn.closedLoop
   // Get the x speed or forward/backward speed. We are inverting this because
 // we want a positive value when we pull up. Xbox controllers
 // return positive values when you pull down by default.
-  final var xSpeed = constants.m_xspeedLimiter.calculate(xAxis)* constants.maxVel;
+  final var xSpeed = Constants.m_xspeedLimiter.calculate(xAxis)* Constants.maxVel;
 
 // Get the y speed or sideways/strafe speed. We are inverting this because
 // we want a positive value when we pull to the left. Xbox controllers
 // return positive values when you pull to the right by default.
-final var ySpeed = constants.-m_yspeedLimiter.calculate(yAxis)* constants.maxVel;
+final var ySpeed = Constants.-m_yspeedLimiter.calculate(yAxis)* Constants.maxVel;
 
 // Get the rate of angular rotation. We are inverting this because we want a
 // positive value when we pull to the left (remember, CCW is positive in
 // mathematics). Xbox controllers return positive values when you pull to
 // the right by default.
-final var rot = contsants.-m_rotLimiter.calculate(kYawRate)* constants.maxYaw;
+final var rot = contsants.-m_rotLimiter.calculate(kYawRate)* Constants.maxYaw;
 
 /*Calculate Swerve Module States based on controller readings
 if left bumper is pressed Drive will be Robot Relative
